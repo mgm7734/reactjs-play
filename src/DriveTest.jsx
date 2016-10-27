@@ -2,7 +2,8 @@
 import React, { Component } from 'react';
 
 const CLIENT_ID = '839737567290-7dcb5jb6au3pdhj45d6ppk2hq4jlhu2u.apps.googleusercontent.com'
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
+		'https://www.googleapis.com/auth/gmail.readonly'];
 
 export default class DriveTest extends Component {
   constructor(props) {
@@ -26,13 +27,31 @@ export default class DriveTest extends Component {
 	<ul style={{textAlign: 'left'}}>{
 	  this.state.tags.map( (tag, i) => (
 	    <li key={i} title={tag.id}>
-	      <a href={tag.webViewLink}>{ tag.name }</a>
+	      <a href={tag.uri}>{ tag.name }</a>
 	    </li>
 	  ))}</ul>
       </div>
     )
   }
+  addTags(newTags) {
+    const tags = [...newTags, ...this.state.tags].sort(({name: x},{name: y}) => {
+      x = x.toLowerCase()
+      y = y.toLowerCase()
+      return x < y ? -1 : x === y ? 0 : 1
+    })
+    this.setState({tags})
+  }
   updateTags() {
+    window.gapi.client.load('gmail', 'v1').then(() =>
+      window.gapi.client.gmail.users.labels.list(
+	{ userId: 'me'
+	, fields: 'labels(id,name,type)'
+	}
+      ), this.logError
+    ).then(({result: {labels}}) => {
+      this.addTags(labels.map(({id,name,type}) => ({id, name, type})))
+    }, this.logError)
+    
     window.gapi.client.load('drive', 'v3').then(() =>
       window.gapi.client.drive.files.get({fileId: 'root', fields: 'id'})
     ).then(({result: {id}}) =>
@@ -43,8 +62,8 @@ export default class DriveTest extends Component {
 	}
       ), this.logError
     ).then(({result: {files, nextPageToken}}) => {
+      this.addTags(files.map(({id,name,webViewLink}) => ({id,name,uri: webViewLink})))
       this.setState({
-	tags: files,
 	nextPageToken
       })
     })
@@ -63,7 +82,7 @@ export default class DriveTest extends Component {
     const auth2 = window.gapi.auth2
     auth2.init({
       client_id: CLIENT_ID,
-      scope: SCOPES[0]
+      scope: SCOPES.join(' ')
     }).then(() => {
       // Listen for sign-in state changes.
       auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus.bind(this))
