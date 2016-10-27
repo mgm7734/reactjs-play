@@ -11,6 +11,10 @@ export default class DriveTest extends Component {
       isSignedIn: false,
       tags: []
     }
+    this.logError = this.logError.bind(this)
+  }
+  logError(err) {
+    console.log('error', err)
   }
   render() {
     return (
@@ -19,23 +23,27 @@ export default class DriveTest extends Component {
 		ref={(btn) => this.signInButton = btn}
 		style={{display: this.state.isSignedIn ? 'none' : 'block'}}
         >Sign In</button>
-	<ul>{ this.state.tags.map( (tag, i) => (
-	    <li key={i}> { tag } </li>
-	  )) }</ul>
+	<ul style={{textAlign: 'left'}}>{
+	  this.state.tags.map( (tag, i) => (
+	    <li key={i} title={tag.id}> { tag.name } - {tag.parents[0]} </li>
+	  ))}</ul>
       </div>
     )
   }
   updateTags() {
-    window.gapi.client.load('drive', 'v3').then(() => 
-      window.gapi.client.drive.files.list({
-	pageSize: 10,
-	fields: "nextPageToken, files(id, name)"
-      })
-    ).then((resp) => 
-      JSON.parse(resp.body)
-    ).then(({files}) => {
+    window.gapi.client.load('drive', 'v3').then(() =>
+      window.gapi.client.drive.files.get({fileId: 'root', fields: 'id'})
+    ).then(({result: {id}}) =>
+      window.gapi.client.drive.files.list(
+	{ pageSize: 100
+	, fields: "nextPageToken, files(id, name, parents)"
+	, q: `mimeType = 'application/vnd.google-apps.folder' and '${id}' in parents`
+	}
+      ), this.logError
+    ).then(({result: {files, nextPageToken}}) => {
       this.setState({
-	tags: files.map((file) => JSON.stringify(file, null, ' '))
+	tags: files,
+	nextPageToken
       })
     })
   }
