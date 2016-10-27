@@ -25,7 +25,9 @@ export default class DriveTest extends Component {
         >Sign In</button>
 	<ul style={{textAlign: 'left'}}>{
 	  this.state.tags.map( (tag, i) => (
-	    <li key={i} title={tag.id}> { tag.name } - {tag.parents[0]} </li>
+	    <li key={i} title={tag.id}>
+	      <a href={tag.webViewLink}>{ tag.name }</a>
+	    </li>
 	  ))}</ul>
       </div>
     )
@@ -35,8 +37,8 @@ export default class DriveTest extends Component {
       window.gapi.client.drive.files.get({fileId: 'root', fields: 'id'})
     ).then(({result: {id}}) =>
       window.gapi.client.drive.files.list(
-	{ pageSize: 100
-	, fields: "nextPageToken, files(id, name, parents)"
+	{ pageSize: 1000
+	, fields: "nextPageToken, files(id, name, webViewLink)"
 	, q: `mimeType = 'application/vnd.google-apps.folder' and '${id}' in parents`
 	}
       ), this.logError
