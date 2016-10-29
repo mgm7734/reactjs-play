@@ -1,27 +1,28 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 import DriveTest from './DriveTest'
 
-class App extends Component {
-  render() {
-    const CLIENT_ID = "413809978087.apps.googleusercontent.com"
-    //const CLIENT_SECRET = "NSlX53kBAmwAnBJmD6e9xlvJ"
-   // const REDIRECT_URL = "http://localhost:8080/oauth2callback"
-    const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-	<DriveTest
-	    clientId={CLIENT_ID}
-	    scope={SCOPES[0]}
-	/>
-      </div>
-    );
-  }
-}
+const App = (props) => (
+  <div className="App">
+    <ul>
+      <li><a href="/"     >Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li>Contact</li>
+    </ul>
+    
+    {props.children}
+    
+  </div>
+)
 
-export default App;
+const Home = (props) => (
+  <DriveTest />
+)
+
+const About = (props) => (
+  <p>This is a ReactJS play project abou Tags</p>
+)
+export {Home, About}
+export default App
+
+

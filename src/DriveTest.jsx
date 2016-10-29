@@ -35,12 +35,16 @@ export default class DriveTest extends Component {
     )
   }
   addTags(newTags) {
-    const tags = [...newTags, ...this.state.tags].sort(({name: x},{name: y}) => {
-      x = x.toLowerCase()
-      y = y.toLowerCase()
-      return x < y ? -1 : x === y ? 0 : 1
+    this.setState((oldState, props) => {
+      const tags = [
+	...newTags, ...oldState.tags
+      ].sort(({name: x},{name: y}) => {
+	x = x.toLowerCase()
+	y = y.toLowerCase()
+	return x < y ? -1 : x === y ? 0 : 1
+      })
+      return {tags}
     })
-    this.setState({tags})
   }
   updateTags() {
     window.gapi.client.load('gmail', 'v1').then(() =>
