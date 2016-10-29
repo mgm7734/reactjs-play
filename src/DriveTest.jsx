@@ -26,7 +26,8 @@ export default class DriveTest extends Component {
         >Sign In</button>
 	<ul style={{textAlign: 'left'}}>{
 	  this.state.tags.map( (tag, i) => (
-	    <li key={i} title={tag.id}>
+	    <li key={i} title={tag.id} style={{listStyleType: 'none'}}>
+	      <img src={tag.icon} role="presentation" height={16} width={16}/>
 	      <a href={tag.uri}>{ tag.name }</a>
 	    </li>
 	  ))}</ul>
@@ -49,7 +50,12 @@ export default class DriveTest extends Component {
 	}
       ), this.logError
     ).then(({result: {labels}}) => {
-      this.addTags(labels.map(({id,name,type}) => ({id, name, type})))
+      this.addTags(labels.map(({id,name,type}) => (
+	{ id
+	, name
+	, type
+	, icon: 'http://www.gstatic.com/images/icons/material/product/1x/gmail_16dp.png'
+	})))
     }, this.logError)
     
     window.gapi.client.load('drive', 'v3').then(() =>
@@ -62,7 +68,12 @@ export default class DriveTest extends Component {
 	}
       ), this.logError
     ).then(({result: {files, nextPageToken}}) => {
-      this.addTags(files.map(({id,name,webViewLink}) => ({id,name,uri: webViewLink})))
+      this.addTags(files.map(({id,name,webViewLink}) => (
+	{ id
+	, name
+	, uri: webViewLink
+	, icon: 'http://www.gstatic.com/images/icons/material/product/2x/drive_16dp.png'
+      })))
       this.setState({
 	nextPageToken
       })
